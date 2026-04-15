@@ -1,0 +1,3 @@
+[submodule "references/espaloma-charge"]
+	path = references/espaloma-charge
+	url = https://github.com/choderalab/espaloma_charge.git
