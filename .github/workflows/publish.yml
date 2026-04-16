@@ -1,0 +1,37 @@
+# Publish wheels/sdists to PyPI (trusted publishing / OIDC).
+#
+# One-time PyPI setup:
+# 1. Create the "expaloma" project on PyPI (or TestPyPI first).
+# 2. Publishing → Add a new pending publisher → GitHub → this repo → workflow file: publish.yml
+# 3. GitHub repo → Settings → Environments → create "pypi" (optional but recommended).
+#
+name: Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pypi:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Build sdist and wheel
+        run: uv build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          # attestations: true  # optional: PEP 740

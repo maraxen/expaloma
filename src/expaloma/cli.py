@@ -1,3 +1,4 @@
+import subprocess
 import sys
 from pathlib import Path
 from typing import Optional
@@ -5,9 +6,38 @@ from typing import Optional
 import numpy as np
 import typer
 
+
+def _find_repo_root_for_scripts() -> Path | None:
+    """Locate project root (contains ``scripts/convert_weights.py``), or None if not a dev checkout."""
+    p = Path(__file__).resolve()
+    for _ in range(8):
+        if (p / "scripts" / "convert_weights.py").is_file():
+            return p
+        if p.parent == p:
+            break
+        p = p.parent
+    return None
+
 app = typer.Typer(
-    help="Expaloma: Native JAX/Equinox port of the espaloma-charge partial charge inference model."
+    name="expaloma",
+    help="Expaloma: JAX/Equinox port of the espaloma-charge partial charge inference model.",
+    invoke_without_command=True,
 )
+
+
+@app.callback()
+def _root(
+    ctx: typer.Context,
+    version: bool = typer.Option(False, "--version", "-V", help="Print package version and exit."),
+) -> None:
+    if version:
+        import importlib.metadata
+
+        typer.echo(importlib.metadata.version("expaloma"))
+        raise typer.Exit(0)
+    if ctx.invoked_subcommand is None:
+        typer.echo(ctx.get_help())
+        raise typer.Exit(0)
 
 
 @app.command()
@@ -28,11 +58,6 @@ def infer(
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Print verbose output"),
 ):
     """Assign ESPALOMA charges to a molecule (implicit H; matches ``espaloma_charge.charge``)."""
-    repo_root = Path(__file__).resolve().parents[2]
-    src = repo_root / "src"
-    if src.is_dir() and str(src) not in sys.path:
-        sys.path.insert(0, str(src))
-
     from expaloma.infer import charges_for_smiles
 
     if verbose:
@@ -54,15 +79,21 @@ def convert_weights(
     output: Path = typer.Argument(..., help="Path to write Equinox weights (.eqx)"),
 ):
     """Convert PyTorch checkpoint to Equinox ``.eqx`` (requires PyTorch for this command)."""
-    import subprocess
-
-    script = Path(__file__).resolve().parents[2] / "scripts" / "convert_weights.py"
+    repo = _find_repo_root_for_scripts()
+    if repo is None:
+        typer.secho(
+            "convert-weights needs a git checkout with scripts/ (and submodules). "
+            "From the repo: python scripts/convert_weights.py MODEL.pt OUT.eqx",
+            err=True,
+        )
+        raise typer.Exit(1)
+    script = repo / "scripts" / "convert_weights.py"
     subprocess.check_call([sys.executable, str(script), str(pytorch_model), str(output)])
 
 
-def main():
+def run() -> None:
     app()
 
 
 if __name__ == "__main__":
-    main()
+    run()

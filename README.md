@@ -10,6 +10,55 @@ uv sync
 uv sync --extra dev
 ```
 
+### Typer CLI
+
+The package exposes a **`typer`** application ([`src/expaloma/cli.py`](src/expaloma/cli.py)) registered as the **`expaloma`** console script in [`pyproject.toml`](pyproject.toml) (`[project.scripts]`). Commands:
+
+- **`expaloma infer SMILES`** — partial charges (bundled `.eqx` by default).
+- **`expaloma convert-weights MODEL.pt OUT.eqx`** — offline conversion (needs a **git checkout** with `scripts/` and submodules; not available from a PyPI-only install).
+- **`expaloma --version`** — print the installed package version.
+
+### PyPI and `uv tool`
+
+After you [publish](#ci-and-releases) to PyPI:
+
+```bash
+pip install expaloma
+expaloma infer "CCO"
+```
+
+Install as a **uv tool** (isolated env with the `expaloma` console script on `PATH`):
+
+```bash
+uv tool install expaloma
+expaloma --version
+# one-shot without installing:
+uvx --from expaloma expaloma infer "CCO"
+```
+
+### CI and releases
+
+| Workflow | Purpose |
+|----------|---------|
+| [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Lint/tests on push/PR to `main` |
+| [`.github/workflows/publish.yml`](.github/workflows/publish.yml) | Build with `uv build` and upload to **PyPI** on **GitHub Release** (OIDC trusted publishing) |
+
+Configure **trusted publishing** on PyPI for this repo/workflow, and add a GitHub **Environment** named `pypi` if you use environment protection rules. Tag releases (e.g. `v0.1.0`) and publish a **GitHub Release** to trigger the workflow (or run it manually via **workflow_dispatch**).
+
+### Branch protection (`gh` CLI)
+
+GitHub’s **rulesets** API is the supported approach. After CI is green, you can require the **`test`** check on `main` via the web UI (**Settings → Rules → Rulesets**), or use the API. Examples:
+
+```bash
+# Repo visibility / basics (requires gh auth)
+gh repo view maraxen/expaloma
+
+# Many teams configure rulesets in the UI so required checks match exactly (e.g. "test" from ci.yml).
+# To require pull requests before merging, use Settings → Rulesets → Add rule → Target: main.
+```
+
+For automation-heavy setups, create a ruleset with the REST API (`gh api repos/{owner}/{repo}/rulesets`) using JSON from **Settings → Rulesets → View JSON**, or start from [GitHub’s ruleset documentation](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository). The **`gh`** CLI does not yet offer a single stable `gh ruleset create` for all options; the UI or API remains the reliable path.
+
 ## Inference (bundled weights)
 
 The public **v0.0.8** checkpoint is shipped as Equinox bytes at `src/expaloma/weights/espaloma_v0_0_8.eqx` (also included in wheels). Provenance and SHA256 hashes are in [`src/expaloma/weights/README.md`](src/expaloma/weights/README.md).
