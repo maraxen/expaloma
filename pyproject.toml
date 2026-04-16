@@ -1,0 +1,31 @@
+[project]
+name = "expaloma"
+version = "0.1.0"
+description = "JAX/Equinox port of espaloma-charge partial charge inference (bundled v0.0.8 weights)"
+readme = "README.md"
+authors = [
+    { name = "Marielle Russo", email = "67157875+maraxen@users.noreply.github.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "equinox>=0.13.6",
+    "jax>=0.9.2",
+    "numpy>=2.4.4",
+    "rdkit>=2026.3.1",
+    "typer>=0.24.1",
+]
+
+[project.scripts]
+expaloma = "expaloma.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["uv_build>=0.10.11,<0.11.0"]
+build-backend = "uv_build"
