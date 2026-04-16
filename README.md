@@ -23,9 +23,11 @@ uv run expaloma infer "CCO" --weights path/to/custom.eqx
 From Python:
 
 ```python
-from expaloma.infer import charges_for_smiles
+from expaloma.infer import charges_for_rdkit_mol, charges_for_smiles
+from rdkit import Chem
 
 q = charges_for_smiles("CCO")  # uses bundled .eqx by default
+q = charges_for_rdkit_mol(Chem.MolFromSmiles("CCO"))  # same atom order as RDKit
 ```
 
 ## Convert PyTorch `model.pt` to `.eqx` (offline)
