@@ -2,7 +2,7 @@
 #
 # One-time PyPI setup:
 # 1. Create the "expaloma" project on PyPI (or TestPyPI first).
-# 2. Publishing → Add a new pending publisher → GitHub → this repo → workflow file: publish.yml
+# 2. Publishing → Add a new pending publisher → GitHub → this repo → workflow: publish.yml → env: pypi
 # 3. GitHub repo → Settings → Environments → create "pypi" (optional but recommended).
 #
 name: Publish

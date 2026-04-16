@@ -16,6 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Chemistry",
 ]
 dependencies = [
@@ -36,12 +37,12 @@ Issues = "https://github.com/maraxen/expaloma/issues"
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.0",
+    "pytest>=9.0",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
 [build-system]
-requires = ["uv_build>=0.10.11,<0.11.0"]
+requires = ["uv_build>=0.11.6,<0.12"]
 build-backend = "uv_build"
